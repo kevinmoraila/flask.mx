@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask — Soluciones Financieras</title>
+    <meta name="description" content="Flask ofrece préstamos personales en México desde $1,000 hasta $5,000 MXN. Sin revisión de buró de crédito. 100% digital.">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ── ANIMATED MESH BACKGROUND ── */
+        .mesh-bg {
+            position: fixed; inset: 0; z-index: 0;
+            overflow: hidden; pointer-events: none;
+        }
+
+        .mesh-bg .orb {
+            position: absolute; border-radius: 50%;
+        }
+
+        .mesh-bg .orb1 {
+            width: 520px; height: 520px;
+            top: -120px; left: -80px;
+            background: radial-gradient(circle, rgba(80,80,95,0.5) 0%, transparent 70%);
+            filter: blur(3px);
+            animation: orb1 9s ease-in-out infinite alternate;
+        }
+
+        .mesh-bg .orb2 {
+            width: 400px; height: 400px;
+            bottom: 10%; right: -60px;
+            background: radial-gradient(circle, rgba(55,55,75,0.45) 0%, transparent 70%);
+            filter: blur(3px);
+            animation: orb2 12s ease-in-out infinite alternate;
+        }
+
+        .mesh-bg .orb3 {
+            width: 300px; height: 300px;
+            top: 42%; left: 32%;
+            background: radial-gradient(circle, rgba(40,40,58,0.38) 0%, transparent 70%);
+            filter: blur(2px);
+            animation: orb3 14s ease-in-out infinite alternate;
+        }
+
+        @keyframes orb1 { from { transform: translate(0,0) scale(1); } to { transform: translate(40px,55px) scale(1.09); } }
+        @keyframes orb2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-28px,-38px) scale(1.06); } }
+        @keyframes orb3 { from { transform: translate(0,0) scale(1); } to { transform: translate(18px,-24px) scale(1.05); } }
+
+        section { position: relative; z-index: 1; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+        /* ── NAVBAR ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 14px 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(8,8,8,0.7);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none;
+        }
+
+        .nav-logo img { height: 34px; width: auto; border-radius: 8px; }
+
+        .nav-logo-text {
+            font-size: 28px; font-weight: 700;
+            color: #fff; letter-spacing: -0.8px;
+        }
+
+        .nav-socials { display: flex; align-items: center; gap: 6px; }
+
+        .nav-socials a {
+            display: flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px;
+            color: rgba(255,255,255,0.6);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .nav-socials a:hover { color: #fff; background: rgba(255,255,255,0.1); }
+        .nav-socials a svg { width: 15px; height: 15px; fill: currentColor; }
+
+        /* ── GLASS CARD ── */
+        .glass {
+            background: rgba(255,255,255,0.055);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.11);
+            border-radius: 22px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+        }
+
+        /* ── HERO ── */
+        #hero {
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center;
+            padding: 110px 24px 70px;
+        }
+
+        .hero-logo {
+            width: 110px; height: 110px;
+            border-radius: 26px;
+            margin-bottom: 28px;
+            object-fit: cover;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.09);
+        }
+
+        .hero-logo-fallback {
+            width: 110px; height: 110px;
+            border-radius: 26px;
+            margin-bottom: 28px;
+            background: #111;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; font-weight: 700; color: #fff; letter-spacing: -1px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+        }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 6px 14px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.11);
+            border-radius: 100px;
+            font-size: 11px; color: rgba(255,255,255,0.6);
+            letter-spacing: 1px; text-transform: uppercase;
+            margin-bottom: 22px;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 8px #4ade80;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        .hero-title {
+            font-size: clamp(56px, 9vw, 96px);
+            font-weight: 700;
+            letter-spacing: -4px;
+            line-height: 1;
+            margin-bottom: 14px;
+            background: linear-gradient(170deg, #fff 30%, rgba(255,255,255,0.45) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-slogan {
+            font-size: clamp(13px, 2vw, 18px);
+            color: rgba(255,255,255,0.4);
+            font-weight: 300;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 44px;
+        }
+
+        .hero-amounts {
+            display: flex; align-items: center; gap: 14px;
+            flex-wrap: wrap; justify-content: center;
+            margin-bottom: 44px;
+        }
+
+        .amount-chip {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 100px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            font-size: 14px; color: rgba(255,255,255,0.7);
+        }
+
+        .amount-chip strong { color: #fff; font-size: 18px; }
+        .amount-sep { color: rgba(255,255,255,0.18); font-size: 18px; }
+
+        .cta-group { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+        .btn-wa {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 15px 30px;
+            background: #fff; color: #000;
+            text-decoration: none; border-radius: 100px;
+            font-size: 15px; font-weight: 600; letter-spacing: -0.2px;
+            transition: all 0.25s;
+            box-shadow: 0 4px 20px rgba(255,255,255,0.1);
+        }
+
+        .btn-wa:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,255,255,0.2); }
+        .btn-wa svg { width: 19px; height: 19px; fill: #25D366; }
+
+        .cta-note { font-size: 12px; color: rgba(255,255,255,0.28); }
+
+        /* ── STATS ── */
+        #stats { padding: 40px 0 80px; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px;
+        }
+
+        .stat-card {
+            padding: 30px 22px; text-align: center;
+            background: rgba(255,255,255,0.055);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            transition: transform 0.25s, border-color 0.25s;
+        }
+
+        .stat-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.2); }
+
+        .stat-num {
+            font-size: 38px; font-weight: 700;
+            letter-spacing: -2px; line-height: 1;
+            color: #fff; margin-bottom: 8px;
+        }
+
+        .stat-lbl { font-size: 12px; color: rgba(255,255,255,0.4); letter-spacing: 0.3px; }
+
+        /* ── SECTION TYPOGRAPHY ── */
+        .s-label {
+            display: block; font-size: 11px;
+            letter-spacing: 3px; text-transform: uppercase;
+            color: rgba(255,255,255,0.3); margin-bottom: 10px;
+        }
+
+        .s-title {
+            font-size: clamp(30px, 5vw, 50px);
+            font-weight: 700; letter-spacing: -2px; line-height: 1.1;
+            margin-bottom: 14px;
+        }
+
+        .s-sub {
+            font-size: 15px; color: rgba(255,255,255,0.42);
+            max-width: 480px; margin-bottom: 52px;
+        }
+
+        /* ── CÓMO FUNCIONA ── */
+        #como { padding: 100px 0; }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .step-card {
+            padding: 30px 24px;
+            background: rgba(255,255,255,0.055);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            position: relative; overflow: hidden;
+            transition: transform 0.25s;
+        }
+
+        .step-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+        }
+
+        .step-card:hover { transform: translateY(-4px); }
+
+        .step-n { font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.22); text-transform: uppercase; margin-bottom: 14px; }
+        .step-ico { font-size: 26px; margin-bottom: 14px; }
+        .step-t { font-size: 17px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.3px; }
+        .step-d { font-size: 13px; color: rgba(255,255,255,0.42); line-height: 1.6; }
+
+        /* ── REQUISITOS ── */
+        #requisitos { padding: 100px 0; }
+
+        .req-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px; align-items: start;
+        }
+
+        .req-card {
+            padding: 36px;
+            background: rgba(255,255,255,0.055);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 22px;
+        }
+
+        .req-list { list-style: none; display: flex; flex-direction: column; gap: 13px; }
+
+        .req-list li {
+            display: flex; align-items: flex-start; gap: 11px;
+            font-size: 14px; color: rgba(255,255,255,0.72);
+        }
+
+        .chk {
+            width: 19px; height: 19px; flex-shrink: 0; margin-top: 1px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .chk svg { width: 10px; height: 10px; stroke: rgba(255,255,255,0.8); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        .opt { font-size: 11px; color: rgba(255,255,255,0.28); margin-left: 3px; }
+
+        /* ── NOSOTROS ── */
+        #nosotros { padding: 100px 0; }
+
+        .mv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 52px; }
+
+        .mv-card {
+            padding: 36px;
+            background: rgba(255,255,255,0.055);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 22px;
+            position: relative; overflow: hidden;
+        }
+
+        .mv-card::after {
+            content: ''; position: absolute;
+            bottom: -40px; right: -40px;
+            width: 110px; height: 110px; border-radius: 50%;
+            background: rgba(255,255,255,0.015);
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .mv-ico { font-size: 22px; margin-bottom: 16px; }
+        .mv-lbl { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 10px; }
+        .mv-t { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 10px; }
+        .mv-p { font-size: 13px; color: rgba(255,255,255,0.47); line-height: 1.7; }
+
+        .valores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px; margin-top: 14px;
+        }
+
+        .valor {
+            padding: 16px; border-radius: 14px; text-align: center;
+            background: rgba(255,255,255,0.045);
+            border: 1px solid rgba(255,255,255,0.09);
+        }
+
+        .valor .ico { font-size: 18px; margin-bottom: 6px; }
+        .valor p { font-size: 12px; color: rgba(255,255,255,0.55); font-weight: 500; }
+
+        /* ── AVISO ── */
+        #aviso { padding: 50px 0; }
+
+        .notice {
+            padding: 28px 36px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 18px;
+            display: flex; align-items: flex-start; gap: 18px;
+        }
+
+        .notice-ico { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+        .notice h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+        .notice p { font-size: 13px; color: rgba(255,255,255,0.42); line-height: 1.6; }
+
+        /* ── PRIVACIDAD ── */
+        #privacidad { padding: 100px 0; }
+
+        .priv-card {
+            padding: 48px;
+            background: rgba(255,255,255,0.055);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+        }
+
+        .priv-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.2px; }
+        .priv-card p, .priv-card ul { font-size: 13px; color: rgba(255,255,255,0.42); line-height: 1.75; margin-bottom: 24px; }
+        .priv-card ul { padding-left: 18px; }
+        .priv-card ul li { margin-bottom: 5px; }
+
+        /* ── CTA FINAL ── */
+        #cta { padding: 100px 0; text-align: center; }
+
+        .cta-card {
+            padding: 80px 36px;
+            background: rgba(255,255,255,0.055);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 28px;
+            position: relative; overflow: hidden;
+        }
+
+        .cta-card::before {
+            content: ''; position: absolute;
+            top: -1px; left: 12%; right: 12%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+        }
+
+        .cta-card .s-sub { margin: 0 auto 36px; text-align: center; }
+
+        /* ── FOOTER ── */
+        footer {
+            padding: 44px 0;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            position: relative; z-index: 1;
+        }
+
+        .footer-inner {
+            display: flex; align-items: center;
+            justify-content: space-between; flex-wrap: wrap; gap: 20px;
+        }
+
+        .footer-logo { display: flex; align-items: center; gap: 9px; }
+        .footer-logo img { height: 26px; border-radius: 6px; }
+        .footer-logo span { font-size: 26px; font-weight: 700; color: #fff; letter-spacing: -0.8px; }
+
+        .footer-socials { display: flex; gap: 7px; }
+
+        .footer-socials a {
+            display: flex; align-items: center; justify-content: center;
+            width: 38px; height: 38px; border-radius: 11px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.09);
+            color: rgba(255,255,255,0.55);
+            text-decoration: none; transition: all 0.2s;
+        }
+
+        .footer-socials a:hover { background: rgba(255,255,255,0.11); color: #fff; transform: translateY(-2px); }
+        .footer-socials a svg { width: 17px; height: 17px; fill: currentColor; }
+
+        .footer-copy {
+            font-size: 11px; color: rgba(255,255,255,0.22);
+            width: 100%; text-align: center;
+            padding-top: 22px; margin-top: 22px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .footer-copy a { color: rgba(255,255,255,0.22); text-decoration: none; }
+        .footer-copy a:hover { color: rgba(255,255,255,0.5); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 720px) {
+            .req-layout, .mv-grid { grid-template-columns: 1fr; }
+            .notice { flex-direction: column; padding: 22px; }
+            .priv-card { padding: 28px 22px; }
+            .cta-card { padding: 50px 22px; }
+            .footer-inner { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── REVEAL ── */
+        .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.55s ease, transform 0.55s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<!-- ANIMATED BACKGROUND -->
+<div class="mesh-bg">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+    <a href="#hero" class="nav-logo">
+        <img src="logo.png" alt="Flask" onerror="this.style.display='none'">
+        <span class="nav-logo-text">Flask</span>
+    </a>
+    <div class="nav-socials">
+        <a href="https://www.facebook.com/flask.mx" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/flask.mx" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </a>
+        <a href="https://x.com/flask_mx" target="_blank" rel="noopener" aria-label="X">
+            <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <a href="https://wa.me/525613498322" target="_blank" rel="noopener" aria-label="WhatsApp">
+            <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+    <div class="hero-badge">Disponible ahora</div>
+    <div style="position:relative; border-radius:24px; overflow:hidden; margin-bottom:28px; box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+        <div style="position:absolute;inset:0;border-radius:24px;backdrop-filter:blur(24px) saturate(200%);-webkit-backdrop-filter:blur(24px) saturate(200%);background:rgba(28,28,30,0.72);"></div>
+        <div style="position:absolute;inset:0;border-radius:24px;box-shadow:inset 1px 1px 1px rgba(255,255,255,0.13),inset -1px -1px 1px rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.14);pointer-events:none;"></div>
+        <div style="position:relative;z-index:1;padding:22px 24px;">
+            <svg width="52" height="60" viewBox="0 0 48 56" fill="none">
+                <path d="M17 4 L17 22 L4 44 C2.5 47 4.5 52 8.5 52 L39.5 52 C43.5 52 45.5 47 44 44 L31 22 L31 4 Z" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+                <path d="M8 42 C10 36 16 32 20 34 C24 36 28 32 34 34 L40 44 C41 46.5 39.5 50 37.5 50 L10.5 50 C8.5 50 7 46.5 8 44 Z" fill="#fff" opacity="0.18"/>
+                <circle cx="19" cy="42" r="2.2" fill="#fff" opacity="0.45"/>
+                <circle cx="27" cy="39" r="1.5" fill="#fff" opacity="0.32"/>
+                <rect x="14" y="2" width="20" height="4" rx="2" fill="#fff"/>
+            </svg>
+        </div>
+    </div>
+    <h1 class="hero-title">Flask</h1>
+    <p class="hero-slogan">Soluciones financieras</p>
+
+    <div class="hero-amounts">
+        <div class="amount-chip">desde <strong>$1,000</strong> MXN</div>
+        <span class="amount-sep">—</span>
+        <div class="amount-chip">hasta <strong>$5,000</strong> MXN</div>
+    </div>
+
+    <div class="cta-group">
+        <a href="https://wa.me/525613498322?text=Hola%2C%20me%20interesa%20solicitar%20un%20pr%C3%A9stamo%20con%20Flask" target="_blank" rel="noopener" class="btn-wa">
+            <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Solicitar préstamo
+        </a>
+        <span class="cta-note">Solo clientes referidos · Sin revisión de buró</span>
+    </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+    <div class="container">
+        <div class="stats-grid reveal">
+            <div class="stat-card">
+                <div class="stat-num">$1M+</div>
+                <div class="stat-lbl">en crédito otorgado</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">+90%</div>
+                <div class="stat-lbl">tasa de retorno de clientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">$5K</div>
+                <div class="stat-lbl">máximo disponible</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num">0</div>
+                <div class="stat-lbl">revisión de buró de crédito</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CÓMO FUNCIONA -->
+<section id="como">
+    <div class="container">
+        <span class="s-label">Proceso</span>
+        <h2 class="s-title">Así de simple.</h2>
+        <p class="s-sub">Sin trámites complicados. Todo desde tu celular en minutos.</p>
+        <div class="steps-grid reveal">
+            <div class="step-card">
+                <div class="step-n">Paso 01</div>
+                <div class="step-ico">💬</div>
+                <h3 class="step-t">Escríbenos</h3>
+                <p class="step-d">Contáctanos por WhatsApp indicando el monto que necesitas. Te atendemos de inmediato.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-n">Paso 02</div>
+                <div class="step-ico">📋</div>
+                <h3 class="step-t">Envía tus datos</h3>
+                <p class="step-d">Manda tu identificación y los documentos solicitados directamente por chat. Sin filas ni visitas.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-n">Paso 03</div>
+                <div class="step-ico">✅</div>
+                <h3 class="step-t">Aprobación</h3>
+                <p class="step-d">Revisamos tu solicitud y te confirmamos la aprobación con todos los detalles del préstamo.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-n">Paso 04</div>
+                <div class="step-ico">💰</div>
+                <h3 class="step-t">Recibe tu dinero</h3>
+                <p class="step-d">Depósito directo a tu cuenta bancaria. Transparente, seguro y sin letra pequeña.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- REQUISITOS -->
+<section id="requisitos">
+    <div class="container">
+        <div class="req-layout">
+            <div class="reveal" style="padding-top:16px;">
+                <span class="s-label">Requisitos</span>
+                <h2 class="s-title">¿Qué necesitas para solicitar?</h2>
+                <p class="s-sub">Documentación mínima. Proceso máximo de sencillez. Todo 100% digital.</p>
+                <a href="https://wa.me/525613498322?text=Hola%2C%20tengo%20una%20pregunta%20sobre%20los%20requisitos%20para%20un%20pr%C3%A9stamo" target="_blank" rel="noopener" class="btn-wa" style="margin-top:4px;">
+                    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    Preguntar por WhatsApp
+                </a>
+            </div>
+            <div class="req-card reveal">
+                <ul class="req-list">
+                    <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Identificación oficial vigente (INE)</li>
+                    <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Número de teléfono celular</li>
+                    <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Correo electrónico</li>
+                    <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Ser mayor de edad</li>
+                    <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Cuenta bancaria a tu nombre</li>
+                    <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Una referencia telefónica</li>
+                    <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Comprobante de domicilio <span class="opt">(en caso necesario)</span></li>
+                    <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Comprobante de ingresos <span class="opt">(opcional)</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- NOSOTROS -->
+<section id="nosotros">
+    <div class="container">
+        <span class="s-label">Nosotros</span>
+        <h2 class="s-title">Más que un préstamo,<br>una solución real.</h2>
+        <div class="mv-grid reveal">
+            <div class="mv-card">
+                <div class="mv-ico">🎯</div>
+                <div class="mv-lbl">Misión</div>
+                <h3 class="mv-t">Acceso financiero real</h3>
+                <p class="mv-p">Brindar acceso a recursos económicos de manera rápida, transparente y confiable a personas que necesitan liquidez inmediata, sin las barreras del sistema financiero tradicional.</p>
+            </div>
+            <div class="mv-card">
+                <div class="mv-ico">🔭</div>
+                <div class="mv-lbl">Visión</div>
+                <h3 class="mv-t">Finanzas con confianza</h3>
+                <p class="mv-p">Ser la alternativa financiera de confianza en México, construyendo relaciones sólidas basadas en la honestidad, el respeto y el crecimiento mutuo entre Flask y sus clientes.</p>
+            </div>
+        </div>
+        <div class="valores-grid reveal">
+            <div class="valor"><div class="ico">🤝🏻</div><p>Confianza</p></div>
+            <div class="valor"><div class="ico">⚡</div><p>Rapidez</p></div>
+            <div class="valor"><div class="ico">🔒</div><p>Seguridad</p></div>
+            <div class="valor"><div class="ico">💎</div><p>Transparencia</p></div>
+            <div class="valor"><div class="ico">❤️</div><p>Cercanía</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- AVISO REFERIDOS -->
+<section id="aviso">
+    <div class="container">
+        <div class="notice reveal">
+            <div class="notice-ico">ℹ️</div>
+            <div>
+                <h3>Servicio por referidos</h3>
+                <p>Flask opera bajo un modelo de referidos. Aceptamos solicitudes únicamente de personas recomendadas por clientes actuales. Este modelo nos permite brindar un servicio más personalizado y mantener altos estándares de confianza. Si conoces a alguien que sea cliente, pídele que te refiera a nosotros.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRIVACIDAD -->
+<section id="privacidad">
+    <div class="container">
+        <span class="s-label">Legal</span>
+        <h2 class="s-title" style="margin-bottom:36px;">Aviso de Privacidad</h2>
+        <div class="priv-card reveal">
+            <h3>Responsable del tratamiento</h3>
+            <p>Flask, con operaciones en México, es responsable del uso y protección de sus datos personales, conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP).</p>
+
+            <h3>Datos personales recabados</h3>
+            <ul>
+                <li>Nombre completo e identificación oficial (INE)</li>
+                <li>Número de teléfono celular y correo electrónico</li>
+                <li>Datos bancarios (CLABE / cuenta a nombre del solicitante)</li>
+                <li>Comprobante de domicilio (cuando aplique)</li>
+                <li>Comprobante de ingresos (cuando aplique)</li>
+                <li>Referencia telefónica personal</li>
+            </ul>
+
+            <h3>Finalidad del tratamiento</h3>
+            <ul>
+                <li>Evaluar y aprobar solicitudes de crédito personal</li>
+                <li>Gestionar el depósito y cobro del préstamo</li>
+                <li>Comunicarnos con usted respecto a su cuenta</li>
+                <li>Cumplir obligaciones legales aplicables</li>
+            </ul>
+
+            <h3>Confidencialidad</h3>
+            <p>Flask se compromete a tratar sus datos con absoluta confidencialidad. No vendemos, cedemos ni transferimos su información personal a terceros sin su consentimiento, salvo requerimiento de autoridad competente.</p>
+
+            <h3>Derechos ARCO</h3>
+            <p>Usted tiene derecho a Acceder, Rectificar, Cancelar u Oponerse al tratamiento de sus datos personales. Para ejercerlos contáctenos vía WhatsApp al <strong>+52 56 1349 8322</strong>.</p>
+
+            <h3>Cambios al aviso</h3>
+            <p style="margin-bottom:0">Flask se reserva el derecho de modificar este aviso en cualquier momento. Cualquier cambio será notificado a través de nuestros canales oficiales.</p>
+        </div>
+    </div>
+</section>
+
+<!-- CTA FINAL -->
+<section id="cta">
+    <div class="container">
+        <div class="cta-card reveal">
+            <h2 class="s-title">¿Listo para resolver<br>tu necesidad?</h2>
+            <p class="s-sub">Escríbenos ahora y recibe atención personalizada al instante.</p>
+            <a href="https://wa.me/525613498322?text=Hola%2C%20me%20interesa%20solicitar%20un%20pr%C3%A9stamo%20con%20Flask" target="_blank" rel="noopener" class="btn-wa">
+                <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Solicitar por WhatsApp
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-logo">
+                <img src="logo.png" alt="Flask" onerror="this.style.display='none'">
+                <span>Flask</span>
+            </div>
+            <div class="footer-socials">
+                <a href="https://www.facebook.com/flask.mx" target="_blank" rel="noopener" aria-label="Facebook">
+                    <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/flask.mx" target="_blank" rel="noopener" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+                <a href="https://x.com/flask_mx" target="_blank" rel="noopener" aria-label="X">
+                    <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="https://wa.me/525613498322" target="_blank" rel="noopener" aria-label="WhatsApp">
+                    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                </a>
+            </div>
+        </div>
+        <div class="footer-copy">
+            © 2026 Flask · Soluciones financieras · México ·
+            <a href="#privacidad">Aviso de Privacidad</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+        });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
