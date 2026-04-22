@@ -76,6 +76,21 @@
             text-decoration: none;
         }
 
+        .collab-chip {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 100px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            font-size: 14px; color: rgba(255,255,255,0.7);
+            text-decoration: none; letter-spacing: 0.1px;
+            transition: all 0.2s;
+        }
+        .collab-chip:hover { background: rgba(255,255,255,0.11); color: #fff; }
+        .collab-chip svg { width: 14px; height: 14px; fill: currentColor; opacity: 0.6; }
+
         .nav-logo img { height: 34px; width: auto; border-radius: 8px; }
 
         .nav-logo-text {
@@ -469,18 +484,46 @@
         .footer-copy a { color: rgba(255,255,255,0.22); text-decoration: none; }
         .footer-copy a:hover { color: rgba(255,255,255,0.5); }
 
+        /* ── FLASK ANIMATIONS ── */
+        .flask-liquid-g {
+            animation: liquidBob 3.5s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: center bottom;
+        }
+        @keyframes liquidBob {
+            0%, 100% { transform: translateY(0px); }
+            33%       { transform: translateY(-1.4px); }
+            66%       { transform: translateY(0.7px); }
+        }
+        .flask-coin {
+            animation: goldCoinGlow 2s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+        @keyframes goldCoinGlow {
+            0%, 100% { opacity: 1;   filter: drop-shadow(0 0 3px #FFD700) drop-shadow(0 0 8px #FFD700) drop-shadow(0 0 14px #FFA500); }
+            50%       { opacity: 0.65; filter: drop-shadow(0 0 6px #FFD700) drop-shadow(0 0 16px #FFD700) drop-shadow(0 0 28px #FFB800); }
+        }
+
         /* ── RESPONSIVE ── */
         @media (max-width: 720px) {
             .req-layout, .mv-grid { grid-template-columns: 1fr; }
             .notice { flex-direction: column; padding: 22px; }
             .priv-card { padding: 28px 22px; }
             .cta-card { padding: 50px 22px; }
-            .footer-inner { flex-direction: column; align-items: flex-start; }
+            .footer-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .footer-inner .collab-chip { align-self: flex-start; }
         }
 
         /* ── REVEAL ── */
         .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.55s ease, transform 0.55s ease; }
         .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 480px) {
+            .hero-amounts { flex-direction: column; align-items: center; gap: 10px; }
+            .amount-sep { display: none; }
+            .amount-chip { width: 210px; text-align: center; }
+        }
     </style>
 </head>
 <body>
@@ -523,9 +566,11 @@
         <div style="position:relative;z-index:1;padding:22px 24px;">
             <svg width="52" height="60" viewBox="0 0 48 56" fill="none">
                 <path d="M17 4 L17 22 L4 44 C2.5 47 4.5 52 8.5 52 L39.5 52 C43.5 52 45.5 47 44 44 L31 22 L31 4 Z" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-                <path d="M8 42 C10 36 16 32 20 34 C24 36 28 32 34 34 L40 44 C41 46.5 39.5 50 37.5 50 L10.5 50 C8.5 50 7 46.5 8 44 Z" fill="#fff" opacity="0.18"/>
-                <circle cx="19" cy="42" r="2.2" fill="#fff" opacity="0.45"/>
-                <circle cx="27" cy="39" r="1.5" fill="#fff" opacity="0.32"/>
+                <g class="flask-liquid-g">
+                    <path d="M8 42 C10 36 16 32 20 34 C24 36 28 32 34 34 L40 44 C41 46.5 39.5 50 37.5 50 L10.5 50 C8.5 50 7 46.5 8 44 Z" fill="#fff" opacity="0.18"/>
+                    <circle class="flask-coin" cx="19" cy="42" r="2.2" fill="#FFD700"/>
+                    <circle cx="27" cy="39" r="1.5" fill="#fff" opacity="0.32"/>
+                </g>
                 <rect x="14" y="2" width="20" height="4" rx="2" fill="#fff"/>
             </svg>
         </div>
